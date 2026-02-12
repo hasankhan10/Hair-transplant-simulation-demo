@@ -7,37 +7,34 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onShowHowItWorks }) => {
   return (
-    <header className="bg-gradient-to-r from-secondary via-[#1a1f24] to-[#2a1810] border-b-2 border-primary sticky top-0 z-50 shadow-xl">
-      <div className="container mx-auto px-4 py-2 md:py-0 md:h-20 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
-        <div className="flex items-center space-x-3 w-full md:w-auto justify-center md:justify-start">
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-            <div className="relative flex items-center justify-center bg-secondary rounded-xl p-2 shadow-lg">
-              <img src="/stova media final logo.jpg" alt="Stova Media Logo" className="h-8 md:h-12 w-auto object-contain" />
-            </div>
+    <header className="sticky top-0 z-50 py-4 px-6">
+      <div className="max-w-7xl mx-auto glass-effect rounded-3xl px-6 py-4 flex items-center justify-between shadow-premium border border-white/50">
+        <div className="flex items-center space-x-4">
+          <div className="bg-secondary px-3 py-1.5 rounded-xl shadow-sm rotate-3 group-hover:rotate-0 transition-transform">
+            <span className="text-xs font-black text-white uppercase tracking-widest">Logo</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg md:text-2xl font-extrabold text-white tracking-tight font-poppins leading-tight">
-              Stova Media <span className="text-primary">Hair Transplant</span>
-            </span>
-            <span className="text-[10px] md:text-xs font-bold text-accent uppercase tracking-[0.3em] font-poppins">
-              AI Simulation Suite
+            <h1 className="text-xl font-extrabold text-secondary tracking-tight font-jakarta leading-none">
+              Your <span className="text-primary italic">Brand Name</span>
+            </h1>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.4em] mt-1">
+              Simulation Portal
             </span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4 md:space-x-6 text-sm font-bold text-white/90 font-poppins">
+        <div className="flex items-center space-x-3">
           <button
             onClick={onShowHowItWorks}
-            className="flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-accent border border-accent/20 rounded-lg transition-all active:scale-95 group"
+            className="flex items-center px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold border border-slate-200 rounded-2xl transition-all active:scale-95 group"
           >
-            <svg className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span className="text-xs md:text-sm uppercase tracking-wider">How It Works</span>
+            <svg className="w-4 h-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span className="text-xs uppercase tracking-wider">How It Works</span>
           </button>
 
-          <div className="hidden sm:flex items-center px-4 py-1.5 bg-white/5 rounded-full border border-white/10 backdrop-blur-md">
-            <span className="w-2 h-2 bg-green-500 rounded-full mr-2 shadow-[0_0_10px_rgba(34,197,94,0.6)] animate-pulse"></span>
-            <span className="text-[10px] md:text-xs uppercase tracking-wider">Clinical AI Active</span>
+          <div className="hidden sm:flex items-center px-4 py-2 bg-green-50 text-green-700 font-bold border border-green-100 rounded-2xl">
+            <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span>
+            <span className="text-[10px] uppercase tracking-widest">AI Core Active</span>
           </div>
         </div>
       </div>

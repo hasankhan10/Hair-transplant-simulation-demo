@@ -149,41 +149,49 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {!showCamera && <Header onShowHowItWorks={() => setShowHowItWorks(true)} />}
+    <div className="min-h-screen flex flex-col bg-[#F9FAFB] relative overflow-hidden">
+      {/* Background Subtle Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-64"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] -ml-64 -mb-64"></div>
 
-      <main className="flex-grow container mx-auto px-4 py-8 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Controls */}
-          <div className="lg:col-span-4 space-y-6">
-            <ControlPanel
-              params={params}
-              setParams={setParams}
-              onUpload={handleImageUpload}
-              onRun={handleRunSimulation}
-              isProcessing={isProcessing}
-              hasImage={!!patientImage}
-              onReset={reset}
-              onStartMapping={() => setIsMapping(true)}
-              showCamera={showCamera}
-              setShowCamera={setShowCamera}
-            />
+      <Header onShowHowItWorks={() => setShowHowItWorks(true)} />
+
+      <main className="flex-grow container mx-auto px-6 py-6 lg:py-10 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-10">
+          {/* Left Column: Controls (Now looks like a floating sidebar) */}
+          <div className="lg:w-[400px] flex-shrink-0">
+            <div className="sticky top-28">
+              <ControlPanel
+                params={params}
+                setParams={setParams}
+                onUpload={handleImageUpload}
+                onRun={handleRunSimulation}
+                isProcessing={isProcessing}
+                hasImage={!!patientImage}
+                onReset={reset}
+                onStartMapping={() => setIsMapping(true)}
+                showCamera={showCamera}
+                setShowCamera={setShowCamera}
+              />
+            </div>
           </div>
 
-          {/* Right Column: Visualization */}
-          <div className="lg:col-span-8">
-            <ImageDisplay
-              beforeImage={patientImage}
-              result={result}
-              isProcessing={isProcessing}
-              error={error}
-              isMapping={isMapping}
-              setIsMapping={setIsMapping}
-              onSaveMask={handleSaveMask}
-              currentMask={params.mask || null}
-              progress={processingProgress}
-              status={processingStatus}
-            />
+          {/* Right Column: Visualization (Expanded) */}
+          <div className="flex-grow">
+            <div className="premium-card p-2 min-h-[600px] flex flex-col">
+              <ImageDisplay
+                beforeImage={patientImage}
+                result={result}
+                isProcessing={isProcessing}
+                error={error}
+                isMapping={isMapping}
+                setIsMapping={setIsMapping}
+                onSaveMask={handleSaveMask}
+                currentMask={params.mask || null}
+                progress={processingProgress}
+                status={processingStatus}
+              />
+            </div>
           </div>
         </div>
       </main>
@@ -191,10 +199,10 @@ const App: React.FC = () => {
       <footer className="bg-white border-t border-slate-200 py-6 mt-auto">
         <div className="container mx-auto px-4 text-center">
           <p className="text-slate-500 text-base">
-            &copy; {new Date().getFullYear()} Stova Media Hair Transplant Simulation.
+            &copy; {new Date().getFullYear()} Your Brand Name Hair Transplant Simulation.
           </p>
           <p className="text-slate-400 text-sm mt-2 italic">
-            "AI-generated preview. Results may vary." Developed by <a target="_blank" className="text-primary hover:underline font-bold" href="http://www.stovamedia.in">Stova Media</a>
+            "AI-generated preview. Results may vary." Developed by <span className="text-primary font-bold">Your Brand Name</span>
           </p>
         </div>
       </footer>

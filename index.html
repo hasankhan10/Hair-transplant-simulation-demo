@@ -14,36 +14,66 @@
             primary: '#FF6B35',
             secondary: '#0F1419',
             accent: '#4DD0E1',
+            medical: {
+              50: '#F8FAFC',
+              100: '#F1F5F9',
+              200: '#E2E8F0',
+              800: '#1E293B'
+            }
           },
           fontFamily: {
-            poppins: ['Poppins', 'sans-serif'],
-            opensans: ['Open Sans', 'sans-serif'],
+            jakarta: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          borderRadius: {
+            '2xl': '1.25rem',
+            '3xl': '2rem',
+          },
+          boxShadow: {
+            'premium': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+            'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
           }
         }
       }
     }
   </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
     body {
-      font-family: 'Open Sans', 'sans-serif';
-      background-color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #fcfcfd;
       color: #0F1419;
     }
 
-    .clinical-shadow {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    .font-poppins {
-      font-family: 'Poppins', sans-serif !important;
+    .premium-card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(241, 245, 249, 1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .premium-card:hover {
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    @keyframes shine {
+      100% {
+        left: 125%;
+      }
+    }
+
+    .animate-shine {
+      animation: shine 0.8s ease-in-out;
     }
   </style>
   <script type="importmap">
