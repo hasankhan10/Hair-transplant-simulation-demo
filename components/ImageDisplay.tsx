@@ -74,7 +74,7 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({
       ctx.font = 'bold 30px Plus Jakarta Sans, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('BEFORE', widthBefore / 2, targetHeight + 50);
-      ctx.fillText('AFTER', widthBefore + (widthAfter / 2), targetHeight + 60);
+      ctx.fillText('SIMULATED OUTCOME', widthBefore + (widthAfter / 2), targetHeight + 60);
 
       const padding = 20;
       const logoH = 35;
