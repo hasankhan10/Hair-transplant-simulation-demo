@@ -63,10 +63,10 @@ async function compositeStrictResultServer(
 ): Promise<Buffer> {
     const originalMetadata = await sharp(originalBuffer).metadata();
 
-    // 1. Create a feathered mask (12px blur like in the browser)
+    // 1. Create a feathered mask (8px blur like in the browser)
     const featheredMask = await sharp(maskBuffer)
         .resize(originalMetadata.width, originalMetadata.height)
-        .blur(12)
+        .blur(8)
         .toBuffer();
 
     // 2. Extract the AI result through the feathered mask
@@ -204,37 +204,25 @@ app.post('/api/v1/simulate', async (req, res) => {
 
         // --- 3. RUN SIMULATION ---
         const densityLabel = (density || "MEDIUM").toUpperCase();
-        const masterRef = await getMasterReferenceServer(densityLabel);
 
-        const prompt = `ROLE: MEDICAL HAIR VISUALIZATION SPECIALIST.
-MISSION: HARMONIOUS SURGICAL RESTORATION.
-1. BIOLOGICAL HARMONY (PRIORITY #1):
-   - LIGHTING INTEGRATION: Analyze the light source, shadows, and highlights of the patient's photo. Apply the EXACT same lighting to the new hair so it melts into the donor hair perfectly.
-   - NATURAL HANDSHAKE: Do not create a "box" or "patch". Taper the density at the mask edges to blend seamlessly with the patient's real hair.
-   - DIRECTIONAL FLOW: Follow the patient's natural hair direction (forward at forehead, swirl at crown) with 100% precision.
-2. DENSITY MAPPING (MASTER REFERENCE):
-   - [MASTER CLINICAL REFERENCE]: Use this as your primary frequency standard for follicle count.
-   - OPAQUE CORE, SOFT EDGES: The center of the mask should follow high frequency follicle counts, while the perimeter must be soft and tapered.
-3. IDENTITY PRESERVATION:
-   - [PATIENT PHOTO] is the exclusive source for DNA (Color + Texture + Wave).
-   - IGNORE CURRENT THINNING: Restore the area as a successful, fully-grown result.
-4. ANATOMY & FRONTOTEMPORAL DESIGN:
-   - FRONTAL HAIRLINE: Create an irregular, organic, "micro-jagged" line. No straight lines.
-   - TEMPORAL CLOSURE: Populate the frontotemporal corners densely.
-FINAL OUTPUT: A realistic medical simulation. ${densityLabel} DENSITY. PERFECT LIGHTING MATCH. INVISIBLE SEAMS.`;
+        const prompt = `ROLE: EXPERT MEDICAL HAIR RESTORATION AI
+TASK: Perform a photorealistic surgical hair transplant simulation.
+
+INSTRUCTIONS:
+1. TARGET AREA (CRITICAL): The solid neon green mask marks the EXACT recipient zone. You must completely cover and fill this ENTIRE green area with new, naturally growing hair. Do NOT leave a single green pixel exposed. Every area that is currently green MUST become hair.
+2. NATIVE HAIR CLONING: You must visually extract, clone, and synthesize the texture of the hair from the sides and back of the patient's head in the photo. Use this exact cloned texture to fill the green area. Do NOT use outside references.
+3. DENSITY TARGET (${densityLabel}): 
+   - LOW: Sparse coverage (30-35 grafts/cm²), scalp clearly visible.
+   - MEDIUM: Standard coverage (45-50 grafts/cm²), slight scalp visibility.
+   - HIGH: Dense coverage (60+ grafts/cm²), no scalp visible.
+4. BLENDING: The new hair must taper and feather flawlessly into the surrounding native hair. Create a natural, irregular, micro-jagged frontal hairline. No straight or artificial lines.
+
+CRITICAL CONSTRAINTS:
+- FATAL ERROR: You MUST physically draw/generate new hair over the solid neon green mask. Returning the original image with a bald green patch is a complete failure.
+- NO GREEN ALLOWED: Completely remove and replace the green tint. No green pixels may remain anywhere on the image. Every green pixel must be replaced by hair or scalp.
+- The final output must be a seamless, photorealistic medical simulation.`;
 
         const parts: any[] = [];
-
-        // Add Master Reference first (Context)
-        if (masterRef) {
-            parts.push({ text: "[MASTER CLINICAL DENSITY REFERENCE - FOR DATA ONLY]" });
-            parts.push({
-                inlineData: {
-                    data: masterRef.data,
-                    mimeType: masterRef.mimeType
-                }
-            });
-        }
 
         // Add Patient (Identity)
         parts.push({ text: "[PRIMARY PATIENT PHOTO - USE THIS FOR ALL PIXELS AND IDENTITY]" });
@@ -269,7 +257,34 @@ FINAL OUTPUT: A realistic medical simulation. ${densityLabel} DENSITY. PERFECT L
             return res.status(500).json({ success: false, error: "AI failed to generate results" });
         }
 
-        // --- 4. FINAL COMPOSITION ---
+        // --- 4. AI QUALITY CONTROL (QA) CHECK BEFORE COMPOSITION ---
+        const qcPrompt = "Analyze this hair transplant simulation result. Answer ONLY 'PASS' if it looks like a person with new hair added. FATAL ERROR: answer ONLY 'FAIL' if ANY of these are true: 1) There is a visible green tint, green pixels, or green patch on the scalp (this means the AI failed to draw hair over the mask), 2) NO new hair was added (it still looks completely bald in the target area), 3) the new hair looks like a solid black block or a literal wig pasted on. You must reject obvious failures or unchanged bald heads with green patches.";
+        
+        const qcResult = await ai.models.generateContent({
+            model: MODEL_NAME,
+            contents: [{
+                parts: [
+                    { text: qcPrompt },
+                    { inlineData: { data: aiResultB64, mimeType: aiMime } }
+                ]
+            }]
+        });
+
+        let qcText = "";
+        if (qcResult.candidates?.[0]?.content?.parts) {
+            for (const part of qcResult.candidates[0].content.parts) {
+                if ('text' in part) qcText += part.text;
+            }
+        }
+
+        if (qcText.toUpperCase().includes("FAIL")) {
+            return res.status(400).json({ 
+                success: false, 
+                error: "The AI generated an unnatural result. Please click Generate Simulation again for a better outcome." 
+            });
+        }
+
+        // --- 5. FINAL COMPOSITION ---
         let finalImageBase64 = aiResultB64;
         if (mask) {
             const finalBuffer = await compositeStrictResultServer(
