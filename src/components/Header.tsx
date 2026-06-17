@@ -3,9 +3,11 @@ import React from 'react';
 
 interface HeaderProps {
   onShowHowItWorks: () => void;
+  brandName: string;
+  brandTagline: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ onShowHowItWorks }) => {
+const Header: React.FC<HeaderProps> = ({ onShowHowItWorks, brandName, brandTagline }) => {
   return (
     <header className="bg-gradient-to-r from-secondary via-[#1a1f24] to-[#2a1810] border-b-2 border-primary sticky top-0 z-50 shadow-xl">
       <div className="container mx-auto px-4 py-2 md:py-0 md:h-20 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
@@ -13,15 +15,15 @@ const Header: React.FC<HeaderProps> = ({ onShowHowItWorks }) => {
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
             <div className="relative flex items-center justify-center bg-secondary rounded-xl p-2 shadow-lg">
-              <span className="text-primary font-black text-xl px-2">YOUR BRAND</span>
+              <span className="text-primary font-black text-xl px-2 uppercase">{brandName}</span>
             </div>
           </div>
           <div className="flex flex-col">
             <span className="text-lg md:text-2xl font-extrabold text-white tracking-tight font-poppins leading-tight">
-              Your Brand <span className="text-primary">Hair Transplant</span>
+              {brandName} <span className="text-primary">Hair Simulation</span>
             </span>
             <span className="text-[10px] md:text-xs font-bold text-accent uppercase tracking-[0.3em] font-poppins">
-              AI Simulation Suite
+              {brandTagline}
             </span>
           </div>
         </div>

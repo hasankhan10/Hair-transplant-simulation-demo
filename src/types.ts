@@ -42,6 +42,7 @@ export enum GraftDensity {
 export interface VisualizationParams {
   density: GraftDensity;
   mask?: string; // Base64 of the surgical marking mask
+  age?: string;
 }
 
 export interface VisualizationResult {

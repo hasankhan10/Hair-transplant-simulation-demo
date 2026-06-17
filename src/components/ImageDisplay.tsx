@@ -1,3 +1,4 @@
+"use client";
 
 import React, { useState } from 'react';
 import { VisualizationResult } from '../types';
@@ -14,6 +15,8 @@ interface ImageDisplayProps {
   currentMask: string | null;
   progress: number;
   status: string;
+  brandName: string;
+  brandTagline: string;
 }
 
 const ImageDisplay: React.FC<ImageDisplayProps> = ({
@@ -26,7 +29,9 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({
   onSaveMask,
   currentMask,
   progress,
-  status
+  status,
+  brandName,
+  brandTagline
 }) => {
   const [activeTab, setActiveTab] = useState<'comparison' | 'result' | 'original'>('comparison');
   const [isDownloading, setIsDownloading] = useState(false);
@@ -99,9 +104,9 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({
       ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'left';
       ctx.font = 'bold 15px Montserrat, sans-serif';
-      ctx.fillText("Your Brand", canvas.width - brandBoxW - padding + 15, targetHeight - brandBoxH - padding + 22);
+      ctx.fillText(brandName, canvas.width - brandBoxW - padding + 15, targetHeight - brandBoxH - padding + 22);
       ctx.font = '500 11px Montserrat, sans-serif';
-      ctx.fillText("Hair Transplant Simulation", canvas.width - brandBoxW - padding + 15, targetHeight - brandBoxH - padding + 38);
+      ctx.fillText(brandTagline, canvas.width - brandBoxW - padding + 15, targetHeight - brandBoxH - padding + 38);
 
       // Trigger Download
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
