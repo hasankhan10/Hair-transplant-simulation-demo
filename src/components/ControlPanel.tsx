@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from 'react';
+import React from 'react';
 import { GraftDensity, VisualizationParams } from '../types';
-import SmartCamera from './SmartCamera';
 
 interface ControlPanelProps {
   params: VisualizationParams;
   setParams: React.Dispatch<React.SetStateAction<VisualizationParams>>;
-  onUpload: (imageData: string, isVerified?: boolean) => void;
+  onTriggerUpload: () => void;
   onRun: () => void;
   onReset: () => void;
   onStartMapping: () => void;
   isProcessing: boolean;
   hasImage: boolean;
-  showCamera: boolean;
-  setShowCamera: (show: boolean) => void;
   currentStep: number;
   setCurrentStep: (step: number) => void;
 }
@@ -22,30 +19,15 @@ interface ControlPanelProps {
 const ControlPanel: React.FC<ControlPanelProps> = ({
   params,
   setParams,
-  onUpload,
+  onTriggerUpload,
   onRun,
   onReset,
   onStartMapping,
   isProcessing,
   hasImage,
-  showCamera,
-  setShowCamera,
   currentStep,
   setCurrentStep
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showUploadOptions, setShowUploadOptions] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      if (typeof window !== 'undefined') {
-        setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-      }
-    };
-    checkMobile();
-  }, []);
-
   const densityLevels = [
     { label: 'Low', value: GraftDensity.LOW, metric: 'Conservative (30-35 grafts/cm²)' },
     { label: 'Medium', value: GraftDensity.MEDIUM, metric: 'Standard (45-50 grafts/cm²)' },
@@ -53,32 +35,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   ];
 
   const currentDensityIndex = densityLevels.findIndex(d => d.value === params.density);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onUpload(event.target.result as string);
-          setCurrentStep(2); // Auto advance to step 2 after upload
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-    if (e.target) {
-      e.target.value = '';
-    }
-    setShowUploadOptions(false);
-  };
-
-  const handleUploadClick = () => {
-    if (isMobile) {
-      setShowUploadOptions(true);
-    } else {
-      fileInputRef.current?.click();
-    }
-  };
 
   const handleDensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const index = parseInt(e.target.value);
@@ -92,7 +48,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     { number: 4, title: 'Generate Look' }
   ];
 
-  // Helper to allow jumping to previous completed steps
   const handleStepClick = (stepNumber: number) => {
     if (stepNumber === 1) {
       setCurrentStep(1);
@@ -157,7 +112,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
             
             <button
-              onClick={handleUploadClick}
+              onClick={onTriggerUpload}
               className="w-full flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl py-12 px-4 transition hover:border-primary hover:bg-primary/5 group"
             >
               <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-primary/10 transition border border-slate-100">
@@ -287,76 +242,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           </button>
           <span className="text-[10px] font-bold text-slate-300 uppercase">Step {currentStep} of 4</span>
         </div>
-      )}
-
-      {/* Input element hidden */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        accept="image/png, image/jpeg, image/jpg, image/webp"
-        onChange={handleFileChange}
-      />
-
-      {/* Action Choice Modal (Mobile) */}
-      {showUploadOptions && (
-        <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowUploadOptions(false)}>
-          <div className="w-full max-w-sm bg-white rounded-t-3xl p-6 animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6" />
-            <h4 className="text-lg font-bold text-secondary mb-4 font-poppins text-center">Select Photo Method</h4>
-
-            <div className="space-y-3">
-              <button
-                onClick={() => { setShowCamera(true); setShowUploadOptions(false); }}
-                className="w-full flex items-center p-4 bg-primary/5 rounded-2xl border border-primary/20 hover:bg-primary/10 transition group"
-              >
-                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mr-4 text-white">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <span className="block font-bold text-secondary font-poppins">Use Camera</span>
-                  <span className="text-xs text-slate-500">Capture photo directly</span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => { fileInputRef.current?.click(); }}
-                className="w-full flex items-center p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:bg-slate-100 transition"
-              >
-                <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center mr-4 text-white">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <span className="block font-bold text-secondary font-poppins">Upload from Gallery</span>
-                  <span className="text-xs text-slate-500">Choose existing photo</span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setShowUploadOptions(false)}
-                className="w-full py-3 text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-2"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showCamera && (
-        <SmartCamera
-          onCapture={(data) => {
-            onUpload(data, true);
-            setCurrentStep(2); // Auto advance to step 2 after capture
-            setShowCamera(false);
-          }}
-          onClose={() => setShowCamera(false)}
-        />
       )}
     </div>
   );

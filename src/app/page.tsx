@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   GraftDensity,
   VisualizationParams,
@@ -10,6 +10,7 @@ import ControlPanel from '../components/ControlPanel';
 import ImageDisplay from '../components/ImageDisplay';
 import Header from '../components/Header';
 import HowItWorksModal from '../components/HowItWorksModal';
+import SmartCamera from '../components/SmartCamera';
 import { autoCropToHead } from '../services/imageProcessor';
 import { generateHairVisualization, validateScalpImage } from '../services/geminiService';
 
@@ -21,6 +22,10 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [showUploadOptions, setShowUploadOptions] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Wizard flow step indicator (1: Upload, 2: Draw, 3: Density, 4: Generate)
   const [currentStep, setCurrentStep] = useState(1);
@@ -50,11 +55,20 @@ export default function Home() {
     { label: 'Indigo Purple', value: '#4F46E5' }
   ];
 
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+      }
+    };
+    checkMobile();
+  }, []);
+
   // Proactive Camera Permission Request (Pre-warmer)
   useEffect(() => {
     const prewarmCamera = async () => {
       if (typeof window === 'undefined') return;
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       if (isMobile) {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -66,7 +80,7 @@ export default function Home() {
       }
     };
     prewarmCamera();
-  }, []);
+  }, [isMobile]);
 
   const handleImageUpload = async (imageData: string, isVerified: boolean = false) => {
     setIsProcessing(true);
@@ -168,6 +182,31 @@ export default function Home() {
     setCurrentStep(1);
   };
 
+  const handleTriggerUpload = () => {
+    if (isMobile) {
+      setShowUploadOptions(true);
+    } else {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          handleImageUpload(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    if (e.target) {
+      e.target.value = '';
+    }
+    setShowUploadOptions(false);
+  };
+
   return (
     <div
       style={{ '--primary-color': branding.primaryColor } as React.CSSProperties}
@@ -188,14 +227,12 @@ export default function Home() {
             <ControlPanel
               params={params}
               setParams={setParams}
-              onUpload={handleImageUpload}
+              onTriggerUpload={handleTriggerUpload}
               onRun={handleRunSimulation}
               isProcessing={isProcessing}
               hasImage={!!patientImage}
               onReset={reset}
               onStartMapping={() => setIsMapping(true)}
-              showCamera={showCamera}
-              setShowCamera={setShowCamera}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
             />
@@ -252,7 +289,6 @@ export default function Home() {
       {/* Dynamic Settings Sidebar Panel */}
       {isSettingsOpen && (
         <div className="fixed inset-0 z-[1000] flex justify-end bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          {/* Backdrop click closer */}
           <div className="absolute inset-0" onClick={() => setIsSettingsOpen(false)} />
           
           <div className="relative w-full max-w-sm bg-white h-full shadow-2xl p-6 flex flex-col justify-between animate-in slide-in-from-right duration-300 z-10">
@@ -272,7 +308,6 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Brand Name Input */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase">Brand Name</label>
                 <input
@@ -284,7 +319,6 @@ export default function Home() {
                 />
               </div>
 
-              {/* Tagline Input */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase">Tagline</label>
                 <input
@@ -296,7 +330,6 @@ export default function Home() {
                 />
               </div>
 
-              {/* Color Picker Swatches */}
               <div className="space-y-3">
                 <label className="block text-xs font-bold text-slate-600 uppercase">Primary Theme Color</label>
                 <div className="grid grid-cols-5 gap-2">
@@ -311,7 +344,6 @@ export default function Home() {
                   ))}
                 </div>
                 
-                {/* Custom Color Selector */}
                 <div className="pt-4 border-t border-slate-100 space-y-2">
                   <span className="block text-[11px] font-bold text-slate-400 uppercase">Custom Color Picker</span>
                   <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
@@ -347,6 +379,77 @@ export default function Home() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Hidden file input element rendered at root level */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/png, image/jpeg, image/jpg, image/webp"
+        onChange={handleFileChange}
+      />
+
+      {/* Action Choice Modal (Mobile) rendered at root level to prevent clipping */}
+      {showUploadOptions && (
+        <div className="fixed inset-0 z-[2000] flex items-end justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowUploadOptions(false)}>
+          <div className="w-full max-w-sm bg-white rounded-t-3xl p-6 animate-in slide-in-from-bottom duration-300 z-[2010]" onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6" />
+            <h4 className="text-lg font-bold text-secondary mb-4 font-poppins text-center">Select Photo Method</h4>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => { setShowCamera(true); setShowUploadOptions(false); }}
+                className="w-full flex items-center p-4 bg-primary/5 rounded-2xl border border-primary/20 hover:bg-primary/10 transition group"
+              >
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mr-4 text-white">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <span className="block font-bold text-secondary font-poppins">Use Camera</span>
+                  <span className="text-xs text-slate-500">Capture photo directly</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => { fileInputRef.current?.click(); }}
+                className="w-full flex items-center p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:bg-slate-100 transition"
+              >
+                <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center mr-4 text-white">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <span className="block font-bold text-secondary font-poppins">Upload from Gallery</span>
+                  <span className="text-xs text-slate-500">Choose existing photo</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setShowUploadOptions(false)}
+                className="w-full py-3 text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Camera modal rendered at root level */}
+      {showCamera && (
+        <SmartCamera
+          onCapture={(data) => {
+            handleImageUpload(data, true);
+            setCurrentStep(2);
+            setShowCamera(false);
+          }}
+          onClose={() => setShowCamera(false)}
+        />
       )}
     </div>
   );
