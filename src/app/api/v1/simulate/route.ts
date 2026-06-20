@@ -61,7 +61,11 @@ export async function POST(req: NextRequest) {
                     { text: validationPrompt },
                     { inlineData: { data: patientBase64, mimeType: patientMime } }
                 ]
-            }]
+            }],
+            config: {
+                temperature: 0.1,
+                topP: 0.9
+            }
         });
 
         let validationText = "";
@@ -88,20 +92,28 @@ export async function POST(req: NextRequest) {
             const maskBuffer = Buffer.from(maskData, 'base64');
 
             const metadata = await sharp(patBuffer).metadata();
+            const width = metadata.width || 512;
+            const height = metadata.height || 512;
 
             // Create a solid green layer
             const greenLayer = await sharp({
                 create: {
-                    width: metadata.width || 512,
-                    height: metadata.height || 512,
+                    width: width,
+                    height: height,
                     channels: 4,
                     background: { r: 0, g: 255, b: 0, alpha: 1 }
                 }
             }).png().toBuffer();
 
+            // Resize the mask to match the patient image metadata width and height
+            // to support scaling from high-DPI screens or canvas resizing.
+            const resizedMaskBuffer = await sharp(maskBuffer)
+                .resize(width, height)
+                .toBuffer();
+
             // Mask the green layer with the user's mask
             const greenMask = await sharp(greenLayer)
-                .composite([{ input: maskBuffer, blend: 'dest-in' }])
+                .composite([{ input: resizedMaskBuffer, blend: 'dest-in' }])
                 .toBuffer();
 
             // Composite onto patient image
@@ -191,7 +203,11 @@ CRITICAL CONSTRAINTS:
                     { text: qcPrompt },
                     { inlineData: { data: aiResultB64, mimeType: aiMime } }
                 ]
-            }]
+            }],
+            config: {
+                temperature: 0.1,
+                topP: 0.9
+            }
         });
 
         let qcText = "";
