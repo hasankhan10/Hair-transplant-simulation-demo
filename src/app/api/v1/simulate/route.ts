@@ -194,7 +194,7 @@ CRITICAL CONSTRAINTS:
         }
 
         // --- 4. AI QUALITY CONTROL (QA) CHECK BEFORE COMPOSITION ---
-        const qcPrompt = "Analyze this hair transplant simulation result. Answer ONLY 'PASS' if it looks like a person with new hair added. FATAL ERROR: answer ONLY 'FAIL' if ANY of these are true: 1) There is a visible green tint, green pixels, or green patch on the scalp (this means the AI failed to draw hair over the mask), 2) NO new hair was added (it still looks completely bald in the target area), 3) the new hair looks like a solid black block or a literal wig pasted on. You must reject obvious failures or unchanged bald heads with green patches.";
+        const qcPrompt = "Analyze this hair transplant simulation result. Answer ONLY 'PASS' if it looks like a person with new hair added. FATAL ERROR: answer ONLY 'FAIL' if ANY of these are true: 1) There is a visible green tint, green pixels, or green patch on the scalp (this means the AI failed to draw hair over the mask), 2) NO new hair was added (it still looks completely bald in the target area), 3) the new hair looks like an obvious, unnatural copy-pasted wig with no blending. You must reject obvious failures or unchanged bald heads with green patches.";
         
         const qcResult = await ai.models.generateContent({
             model: MODEL_NAME,
